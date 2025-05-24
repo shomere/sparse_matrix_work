@@ -16,6 +16,7 @@ def get_element(matrix, row, col):
     return matrix.get((row, col), 0)
 
 # === Matrix Operations ===
+
 def add_sparse_matrix(a, b):
     result = {}
     for key in a:
@@ -41,6 +42,26 @@ def subtract_sparse_matrix(a, b):
         else:
             result[key] = -b[key]
     return result
+
+def multiply_sparse_matrix(a, b):
+    result = {}
+    # Create a mapping from column to its elements in b
+    b_by_row = {}
+    for (row, col), val in b.items():
+        if row not in b_by_row:
+            b_by_row[row] = {}
+        b_by_row[row][col] = val
+
+    for (i, k1), v1 in a.items():
+        if k1 in b_by_row:
+            for j, v2 in b_by_row[k1].items():
+                key = (i, j)
+                result[key] = result.get(key, 0) + v1 * v2
+                if result[key] == 0:
+                    del result[key]
+    return result
+
+# === File Reading ===
 
 def read_file_matrix(path):
     matrix = {}
@@ -81,18 +102,17 @@ def read_file_matrix(path):
         print("Reason:", str(e))
     return num_rows, num_cols, matrix
 
-
 # === Main Menu ===
+
 print("Choose operation:")
 print("1. Add")
 print("2. Subtract")
 print("3. Multiply")
 choice = input("Enter your choice (1/2/3): ")
 
-# Get current directory
-base_dir = os.path.dirname(__file__)
-path1 = os.path.join(base_dir, "sample_inputs", "matrix1.txt")
-path2 = os.path.join(base_dir, "sample_inputs", "matrix2.txt")
+# Provide your actual file paths here
+path1 = r"C:\Users\HP\Learning DSA\sparse_matrix_work\sample_inputs\easy_sample_02_1.txt"
+path2 = r"C:\Users\HP\Learning DSA\sparse_matrix_work\sample_inputs\easy_sample_02_2.txt"
 
 rows1, cols1, m1 = read_file_matrix(path1)
 rows2, cols2, m2 = read_file_matrix(path2)
@@ -122,6 +142,8 @@ else:
 
 # === Display Result ===
 if result:
-    print("Result:")
+    print("\nResult (non-zero elements):")
     for key in sorted(result):
         print(f"{key} => {result[key]}")
+else:
+    print("\nNo non-zero elements in result or operation failed.")
